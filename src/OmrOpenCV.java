@@ -11,6 +11,6 @@ public class OmrOpenCV {
     public static void main(String[] args) {
         System.out.println("OMR PRESENTATION Paval Ambrozie");
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        new StaveUtils().run(args[0]);
+        new StaveImageProcessing().run(args[0]);
     }
 }
