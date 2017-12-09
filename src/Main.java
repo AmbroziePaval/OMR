@@ -18,5 +18,6 @@ public class Main {
 
         OmrOpenCV omrOpenCV = new OmrOpenCV(args[0]);
         omrOpenCV.detectMusicElement();
+        omrOpenCV.detectStaveLines();
     }
 }

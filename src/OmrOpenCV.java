@@ -64,9 +64,19 @@ public class OmrOpenCV {
         List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
 
         List<Rect> sortedRectangles = StaveElementDetection.sortElementsRectangles(rectangles);
+        System.out.println("Music elements rectangles");
         sortedRectangles.forEach(rect -> System.out.println("rectangle " + sortedRectangles.indexOf(rect) + " - x:" + rect.x + " y:" + rect.y));
 
         Mat elementsWithRectanglesMat = StaveElementDetection.findNotationContours(refinedVerticalObjectsMat, rectangles);
+        staveImageProcessing.saveImage(elementsWithRectanglesMat, DEFAULT_OUTPUT.getPath());
+    }
+
+    public void detectStaveLines() {
+        List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedHorizontalObjectsMat);
+        System.out.println("Stave lines rectangles");
+        rectangles.forEach(rect -> System.out.println("rectangle " + rectangles.indexOf(rect) + " - x:" + rect.x + " y:" + rect.y));
+
+        Mat elementsWithRectanglesMat = StaveElementDetection.findNotationContours(refinedHorizontalObjectsMat, rectangles);
         staveImageProcessing.saveImage(elementsWithRectanglesMat, DEFAULT_OUTPUT.getPath());
     }
 }
