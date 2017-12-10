@@ -17,10 +17,11 @@ public class Main {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         OmrOpenCV omrOpenCV = new OmrOpenCV(args[0]);
-//        omrOpenCV.detectMusicElement();
+        omrOpenCV.detectMusicElement();
 //        omrOpenCV.detectStaveLines();
 //        omrOpenCV.detectAllElements();
 //        omrOpenCV.saveAllElements();
-        omrOpenCV.detectQuarters();
+//        omrOpenCV.detectQuarters();
+        omrOpenCV.recongniseElementWithDatasets();
     }
 }

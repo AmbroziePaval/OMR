@@ -1,16 +1,15 @@
 import opencv.MatUtils;
+import opencv.MatchingTemplate;
 import opencv.StaveElementDetection;
 import opencv.StaveImageProcessing;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import utils.DatasetPaths;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static utils.OutputPaths.*;
@@ -24,6 +23,7 @@ import static utils.OutputPaths.*;
  */
 public class OmrOpenCV {
     private StaveImageProcessing staveImageProcessing;
+    private MatchingTemplate matchingTemplate;
 
     private Mat rawInput;
     private Mat verticalObjectsMat;
@@ -35,6 +35,7 @@ public class OmrOpenCV {
 
     public OmrOpenCV(String inputImagePath) {
         staveImageProcessing = new StaveImageProcessing();
+        matchingTemplate = new MatchingTemplate();
         processImage(inputImagePath);
         colorRed = new Scalar(0, 0, 255);
         colorBlue = new Scalar(255, 0, 0);
@@ -97,10 +98,6 @@ public class OmrOpenCV {
         List<Rect> elementRectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
         List<Rect> lineRectangles = StaveElementDetection.getImageElementContourRectangles(refinedHorizontalObjectsMat);
 
-//        Mat elementsWithRectanglesMat = StaveElementDetection.findNotationContours(refinedVerticalObjectsMat, elementRectangles, colorRed);
-//        Mat linesWithRectanglesMat = StaveElementDetection.findNotationContours(refinedHorizontalObjectsMat, lineRectangles, colorBlue);
-
-
         Core.bitwise_not(verticalObjectsMat, verticalObjectsMat);
         Core.bitwise_not(horizontalObjectsMat, horizontalObjectsMat);
         Mat elementsWithRectanglesMat = StaveElementDetection.findNotationContours(verticalObjectsMat, elementRectangles, colorRed);
@@ -120,52 +117,15 @@ public class OmrOpenCV {
         });
     }
 
-    public void detectQuarters() {
-        Mat source = refinedVerticalObjectsMat.clone();
-        Mat quartedTemplate = Imgcodecs.imread("C:\\Users\\Ambrozie\\IdeaProjects\\OpenCVStart\\outputs\\elements\\9.png");
-        Imgproc.cvtColor(quartedTemplate, quartedTemplate, Imgproc.COLOR_BGR2GRAY);
-        Mat result = new Mat();
+    public void recongniseElementWithDatasets() {
+        List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
 
-        source.convertTo(source, CvType.CV_32FC1);
-        quartedTemplate.convertTo(quartedTemplate, CvType.CV_32FC1);
-        int result_cols = source.cols() - quartedTemplate.cols() + 1;
-        int result_rows = source.rows() - quartedTemplate.rows() + 1;
-        result.create(result_rows, result_cols, CvType.CV_32FC1);
+        List<Rect> quartersRectangles = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.QUARTERS_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
 
-        Imgproc.matchTemplate(source, quartedTemplate, result, Imgproc.TM_CCOEFF_NORMED);
-
-        double threshold = 0.9;
-        Imgproc.threshold(result, result, threshold, 255, Imgproc.THRESH_TOZERO);
-
-        List<Point> quarterPoints = new ArrayList<>();
-
-        while (true) {
-
-            Core.MinMaxLocResult locResult = Core.minMaxLoc(result);
-            if (locResult.maxVal > threshold) {
-                quarterPoints.add(locResult.maxLoc);
-
-                int x = (int) locResult.maxLoc.x;
-                int y = (int) locResult.maxLoc.y;
-                Imgproc.floodFill(result, new Mat(), locResult.maxLoc, new Scalar(0));
-                result.put(x, y, 0);
-                System.out.println("Found match at: " + x + " " + y);
-            } else {
-                break;
-            }
-        }
-
-
-
-        Imgproc.cvtColor(source, source, Imgproc.COLOR_GRAY2BGR);
-        for (Point point : quarterPoints) {
-            Imgproc.rectangle(source,
-                    point,
-                    new Point(point.x + quartedTemplate.width() - 1, point.y + quartedTemplate.height() - 1),
-                    colorRed, 1, Imgproc.LINE_8, 0);
-        }
-        staveImageProcessing.saveImage(source, DEFAULT_OUTPUT.getPath());
-
-        int a = 2;
+        Mat elementsWithQuartersRectangles = StaveElementDetection.findNotationContours(refinedVerticalObjectsMat, quartersRectangles, colorRed);
+        staveImageProcessing.saveImage(elementsWithQuartersRectangles, DEFAULT_OUTPUT.getPath());
     }
 }

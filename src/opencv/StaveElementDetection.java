@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * tave Utils Class used for detection algorithms on a stave input image.
+ * Stave Utils Class used for detection algorithms on a stave input image.
  * <p>
  * Creator: Ambrozie
  * Info: opencv.StaveElementDetection.class
@@ -49,7 +49,7 @@ public class StaveElementDetection {
      * @param rectangles the list of rectangles
      * @return a new list of rectangles that do not intersect
      */
-    private static List<Rect> generifyTheRectangleContours(List<Rect> rectangles) {
+    public static List<Rect> generifyTheRectangleContours(List<Rect> rectangles) {
         for (int i = 0; i < rectangles.size(); i++) {
             int j = 0;
             while (j < rectangles.size()) {
@@ -108,8 +108,8 @@ public class StaveElementDetection {
 
         for (Rect rect : rectangles) {
             Imgproc.rectangle(inputMat,
-                    new Point(rect.x - 1, rect.y - 1),
-                    new Point(rect.x + rect.width - 1, rect.y + rect.height - 1),
+                    new Point(rect.x, rect.y),
+                    new Point(rect.x + rect.width, rect.y + rect.height),
                     color, 1, Imgproc.LINE_8, 0);
 //            System.out.println("contour" + " x:" + rect.x + " y:" + rect.y);
         }
