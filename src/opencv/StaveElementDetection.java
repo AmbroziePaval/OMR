@@ -97,18 +97,20 @@ public class StaveElementDetection {
      *
      * @param inputImage the image bitmap
      * @param rectangles the list of needed rectangles
+     * @param color
      * @return an image bitmap with all the elements contoured in a red rectangle
      */
-    public static Mat findNotationContours(Mat inputImage, List<Rect> rectangles) {
+    public static Mat findNotationContours(Mat inputImage, List<Rect> rectangles, Scalar color) {
         Mat inputMat = inputImage.clone();
-        Imgproc.cvtColor(inputMat, inputMat, Imgproc.COLOR_GRAY2BGR);
-        Scalar contourScalar = new Scalar(0, 0, 255);
+        if (inputMat.channels() < 3) {
+            Imgproc.cvtColor(inputMat, inputMat, Imgproc.COLOR_GRAY2BGR);
+        }
 
         for (Rect rect : rectangles) {
             Imgproc.rectangle(inputMat,
-                    new Point(rect.x, rect.y),
-                    new Point(rect.x + rect.width, rect.y + rect.height),
-                    contourScalar, 1, Imgproc.LINE_8, 0);
+                    new Point(rect.x - 1, rect.y - 1),
+                    new Point(rect.x + rect.width - 1, rect.y + rect.height - 1),
+                    color, 1, Imgproc.LINE_8, 0);
 //            System.out.println("contour" + " x:" + rect.x + " y:" + rect.y);
         }
 
