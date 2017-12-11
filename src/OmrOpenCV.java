@@ -1,16 +1,21 @@
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import opencv.MatUtils;
 import opencv.MatchingTemplate;
 import opencv.StaveElementDetection;
 import opencv.StaveImageProcessing;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import utils.DatasetPaths;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static utils.OutputPaths.*;
 
@@ -31,6 +36,7 @@ public class OmrOpenCV {
     private Mat refinedVerticalObjectsMat;
     private Mat refinedHorizontalObjectsMat;
     private Scalar colorRed;
+    private Scalar colorGreen;
     private Scalar colorBlue;
 
     public OmrOpenCV(String inputImagePath) {
@@ -38,6 +44,7 @@ public class OmrOpenCV {
         matchingTemplate = new MatchingTemplate();
         processImage(inputImagePath);
         colorRed = new Scalar(0, 0, 255);
+        colorGreen = new Scalar(0, 255, 0);
         colorBlue = new Scalar(255, 0, 0);
     }
 
@@ -120,12 +127,36 @@ public class OmrOpenCV {
     public void recongniseElementWithDatasets() {
         List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
 
-        List<Rect> quartersRectangles = matchingTemplate.detectAllElementsUsingDataset(
+        Map<Rect, Mat> quartersMat = matchingTemplate.detectAllElementsUsingDataset(
                 DatasetPaths.QUARTERS_DATASET.getPath(),
                 refinedVerticalObjectsMat,
                 rectangles);
 
-        Mat elementsWithQuartersRectangles = StaveElementDetection.findNotationContours(refinedVerticalObjectsMat, quartersRectangles, colorRed);
+        Table<Rect, Mat, Point> centerNoteByRectangeWithImage = HashBasedTable.create();
+        quartersMat.forEach((rectangle, noteMat) -> {
+            Point centerPoint = matchingTemplate.getAproximateCenterNoteHeadPoint(noteMat);
+            if (centerPoint != null) {
+                centerNoteByRectangeWithImage.put(rectangle, noteMat, new Point(rectangle.x + centerPoint.x, rectangle.y + centerPoint.y));
+            }
+        });
+
+        Mat elementsWithQuartersRectangles = StaveElementDetection.findNotationContours(refinedVerticalObjectsMat, new ArrayList<>(quartersMat.keySet()), colorRed);
+        centerNoteByRectangeWithImage.values().forEach(
+                centerPoint -> Imgproc.circle(elementsWithQuartersRectangles, centerPoint, 1, colorGreen, 1, Imgproc.LINE_8, 0));
+
         staveImageProcessing.saveImage(elementsWithQuartersRectangles, DEFAULT_OUTPUT.getPath());
+    }
+
+    public void findAllCenterNotePoints() {
+        Mat outputMat = refinedVerticalObjectsMat.clone();
+        if (outputMat.channels() < 3) {
+            Imgproc.cvtColor(outputMat, outputMat, Imgproc.COLOR_GRAY2BGR);
+        }
+
+        List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
+
+        List<Point> centers = matchingTemplate.findAllNoteHeadCenters(refinedVerticalObjectsMat, rectangles);
+        centers.forEach(centerPoint -> Imgproc.circle(outputMat, centerPoint, 1, colorGreen, 1, Imgproc.LINE_8, 0));
+        staveImageProcessing.saveImage(outputMat, DEFAULT_OUTPUT.getPath());
     }
 }

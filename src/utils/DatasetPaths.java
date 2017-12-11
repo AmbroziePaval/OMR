@@ -10,6 +10,7 @@ package utils;
 public enum DatasetPaths {
 
     DATASET_FOLDER("C:\\Users\\Ambrozie\\IdeaProjects\\OpenCVStart\\resources\\dataset"),
+    FULL_HEAD_TEMPLATE(DATASET_FOLDER.getPath() + "\\full_head.png"),
     QUARTERS_DATASET(DATASET_FOLDER.getPath() + "\\patrimi.png");
 
     private final String path;

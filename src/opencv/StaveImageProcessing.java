@@ -3,6 +3,8 @@ package opencv;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -108,6 +110,10 @@ public class StaveImageProcessing {
 
         smoothEdgesMat.copyTo(verticalMat, edgesMat);
         return verticalMat;
+    }
+
+    public static boolean pointInsideRect(Rect rect, Point point) {
+        return point.x >= rect.x && point.y >= rect.y && point.x <= (rect.x + rect.width) && point.y <= (rect.y + rect.height);
     }
 
     /**

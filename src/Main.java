@@ -22,6 +22,7 @@ public class Main {
 //        omrOpenCV.detectAllElements();
 //        omrOpenCV.saveAllElements();
 //        omrOpenCV.detectQuarters();
-        omrOpenCV.recongniseElementWithDatasets();
+//        omrOpenCV.recongniseElementWithDatasets();
+        omrOpenCV.findAllCenterNotePoints();
     }
 }
