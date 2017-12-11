@@ -92,7 +92,7 @@ public class MatchingTemplate {
         datasetMat.convertTo(datasetMat, CvType.CV_32FC1);
         Mat result = new Mat();
         result.create(datasetMat.width(), datasetMat.height(), CvType.CV_32FC1);
-        double threshold = 0.9;
+        double threshold = 0.87;
 
         Map<Rect, Mat> matchingElements = new HashMap<>();
         elementRectangles.forEach(elementRect -> {

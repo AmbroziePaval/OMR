@@ -16,6 +16,7 @@ import utils.DatasetPaths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static utils.OutputPaths.*;
 
@@ -147,7 +148,7 @@ public class OmrOpenCV {
         staveImageProcessing.saveImage(elementsWithQuartersRectangles, DEFAULT_OUTPUT.getPath());
     }
 
-    public void findAllCenterNotePoints() {
+    public List<Point> findAllCenterNotePoints() {
         Mat outputMat = refinedVerticalObjectsMat.clone();
         if (outputMat.channels() < 3) {
             Imgproc.cvtColor(outputMat, outputMat, Imgproc.COLOR_GRAY2BGR);
@@ -155,8 +156,85 @@ public class OmrOpenCV {
 
         List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
 
-        List<Point> centers = matchingTemplate.findAllNoteHeadCenters(refinedVerticalObjectsMat, rectangles);
+        List<Point> centers = matchingTemplate.findAllNoteHeadCenters(refinedVerticalObjectsMat.clone(), rectangles);
         centers.forEach(centerPoint -> Imgproc.circle(outputMat, centerPoint, 1, colorGreen, 1, Imgproc.LINE_8, 0));
         staveImageProcessing.saveImage(outputMat, DEFAULT_OUTPUT.getPath());
+
+        return centers;
+    }
+
+
+    public void recongiseElementsWithCenter() {
+        List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
+        List<Point> centers = matchingTemplate.findAllNoteHeadCenters(refinedVerticalObjectsMat, rectangles);
+
+        // recognise all quarter notes
+        Map<Rect, Mat> quartersMat = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.QUARTERS_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        rectangles.removeAll(quartersMat.keySet());
+
+        Table<Rect, Mat, Point> notesWithMatAndCenter = HashBasedTable.create();
+        quartersMat.forEach((rectangle, noteMat) -> {
+            Optional<Point> center = getElementCenterPoint(rectangle, centers);
+            center.ifPresent(point -> notesWithMatAndCenter.put(rectangle, noteMat, point));
+        });
+
+        // recognise all octet notes
+        Map<Rect, Mat> octetsMat = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.OCTETS_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        octetsMat.forEach((rectangle, noteMat) -> {
+            Optional<Point> center = getElementCenterPoint(rectangle, centers);
+            center.ifPresent(point -> notesWithMatAndCenter.put(rectangle, noteMat, point));
+        });
+        rectangles.removeAll(octetsMat.keySet());
+
+
+        // recognise all bar line
+        Map<Rect, Mat> barsMat = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.BARS_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        rectangles.removeAll(barsMat.keySet());
+
+        // recognise all dots
+        Map<Rect, Mat> dotsMat = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.DOTS_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        rectangles.removeAll(dotsMat.keySet());
+
+        // recognise all cleffs
+        Map<Rect, Mat> cleffMat = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.CLEFF_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        rectangles.removeAll(cleffMat.keySet());
+
+        // recognise all diezes(?)
+        Map<Rect, Mat> diezMat = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.DIEZ_DATASET.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        rectangles.removeAll(diezMat.keySet());
+    }
+
+    /**
+     * Find the note center point
+     *
+     * @param rectangle input rectangle
+     * @param centers   list of note centers
+     * @return NULL if not a note
+     */
+    private Optional<Point> getElementCenterPoint(Rect rectangle, List<Point> centers) {
+        for (Point point : centers) {
+            if (StaveImageProcessing.pointInsideRect(rectangle, point)) {
+                return Optional.of(point);
+            }
+        }
+        return Optional.empty();
     }
 }

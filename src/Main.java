@@ -1,4 +1,7 @@
 import org.opencv.core.Core;
+import org.opencv.core.Point;
+
+import java.util.List;
 
 /**
  * Main class starter.
@@ -17,12 +20,13 @@ public class Main {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         OmrOpenCV omrOpenCV = new OmrOpenCV(args[0]);
-        omrOpenCV.detectMusicElement();
+//        omrOpenCV.detectMusicElement();
 //        omrOpenCV.detectStaveLines();
 //        omrOpenCV.detectAllElements();
 //        omrOpenCV.saveAllElements();
 //        omrOpenCV.detectQuarters();
 //        omrOpenCV.recongniseElementWithDatasets();
-        omrOpenCV.findAllCenterNotePoints();
+        List<Point> allCenterNotePoints = omrOpenCV.findAllCenterNotePoints();
+        omrOpenCV.recongiseElementsWithCenter();
     }
 }

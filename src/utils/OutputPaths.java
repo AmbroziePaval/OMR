@@ -11,6 +11,7 @@ public enum OutputPaths {
     OUTPUT_FOLDER_NAME("C:\\Users\\Ambrozie\\IdeaProjects\\OpenCVStart\\outputs"),
     ELEMENTS_OUTPUT_FOLDER_NAME("C:\\Users\\Ambrozie\\IdeaProjects\\OpenCVStart\\outputs\\elements\\"),
     DEFAULT_OUTPUT(OUTPUT_FOLDER_NAME.path + "\\output.png"),
+    DEFAULT_OUTPUT2(OUTPUT_FOLDER_NAME.path + "\\output2.png"),
     ALL_ELEMENTS(OUTPUT_FOLDER_NAME.path + "\\allRectangles.png"),
     GRAY_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\0_gray.png"),
     BITWISE_NOT_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\1_bitwise_not.png"),
