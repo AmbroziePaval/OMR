@@ -1,6 +1,11 @@
+import model.Element;
 import org.opencv.core.Core;
-import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import utils.OutputPaths;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -26,7 +31,30 @@ public class Main {
 //        omrOpenCV.saveAllElements();
 //        omrOpenCV.detectQuarters();
 //        omrOpenCV.recongniseElementWithDatasets();
-        List<Point> allCenterNotePoints = omrOpenCV.findAllCenterNotePoints();
-        omrOpenCV.recongiseElementsWithCenter();
+//        List<Point> allCenterNotePoints = omrOpenCV.findAllCenterNotePoints();
+        List<Element> elements = omrOpenCV.recongiseElementsWithCenter();
+        elements.sort(getElementComparator());
+
+        PrintWriter resultFile = new PrintWriter(new FileWriter(OutputPaths.SORTED_RECOGNISED_ELEMENTS.getPath()));
+        elements.forEach(element -> resultFile.println(elements.indexOf(element) + "-\t" + element.toString()));
+        resultFile.close();
+    }
+
+    private static Comparator<Element> getElementComparator() {
+        return (element1, element2) -> {
+            Rect rectFirst = element1.getRectangle();
+            Rect rectSecond = element2.getRectangle();
+
+            Integer first, second;
+            if (Math.abs(rectFirst.y - rectSecond.y) < 50) {
+                first = rectFirst.x;
+                second = rectSecond.x;
+                return first.compareTo(second);
+            } else {
+                first = rectFirst.y;
+                second = rectSecond.y;
+            }
+            return first.compareTo(second);
+        };
     }
 }

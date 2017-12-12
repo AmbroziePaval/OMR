@@ -22,7 +22,8 @@ public enum OutputPaths {
     DIL_EDGES_VERTICAL_OBJ_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\6_dil_edges.png"),
     SMOOTH_VERTICAL_OBJ_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\7_smooth.png"),
     REFINED_VERTICAL_OBJ_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\8_vert_refined.png"),
-    REFINED_HORIZONTAL_OBJ_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\9_horiz_refined.png");
+    REFINED_HORIZONTAL_OBJ_IMAGE_PATH(OUTPUT_FOLDER_NAME.path + "\\9_horiz_refined.png"),
+    SORTED_RECOGNISED_ELEMENTS(OUTPUT_FOLDER_NAME.path + "\\sorted_recognised_elements.txt");
 
     private final String path;
 

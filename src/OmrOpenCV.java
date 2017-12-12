@@ -1,5 +1,9 @@
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import model.Element;
+import model.ElementType;
+import model.NodeDuration;
+import model.PlayElement;
 import opencv.MatUtils;
 import opencv.MatchingTemplate;
 import opencv.StaveElementDetection;
@@ -164,9 +168,10 @@ public class OmrOpenCV {
     }
 
 
-    public void recongiseElementsWithCenter() {
+    public List<Element> recongiseElementsWithCenter() {
         List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedVerticalObjectsMat);
         List<Point> centers = matchingTemplate.findAllNoteHeadCenters(refinedVerticalObjectsMat, rectangles);
+        List<Element> elements = new ArrayList<>();
 
         // recognise all quarter notes
         Map<Rect, Mat> quartersMat = matchingTemplate.detectAllElementsUsingDataset(
@@ -175,22 +180,21 @@ public class OmrOpenCV {
                 rectangles);
         rectangles.removeAll(quartersMat.keySet());
 
-        Table<Rect, Mat, Point> notesWithMatAndCenter = HashBasedTable.create();
-        quartersMat.forEach((rectangle, noteMat) -> {
-            Optional<Point> center = getElementCenterPoint(rectangle, centers);
-            center.ifPresent(point -> notesWithMatAndCenter.put(rectangle, noteMat, point));
+        quartersMat.forEach((rect, mat) -> {
+            Optional<Point> center = getElementCenterPoint(rect, centers);
+            center.ifPresent(point -> elements.add(new PlayElement(rect, mat, ElementType.NOTE, NodeDuration.QUARTER, center.get())));
         });
 
         // recognise all octet notes
-        Map<Rect, Mat> octetsMat = matchingTemplate.detectAllElementsUsingDataset(
+        Map<Rect, Mat> eightsMat = matchingTemplate.detectAllElementsUsingDataset(
                 DatasetPaths.OCTETS_DATASET.getPath(),
                 refinedVerticalObjectsMat,
                 rectangles);
-        octetsMat.forEach((rectangle, noteMat) -> {
-            Optional<Point> center = getElementCenterPoint(rectangle, centers);
-            center.ifPresent(point -> notesWithMatAndCenter.put(rectangle, noteMat, point));
+        eightsMat.forEach((rect, mat) -> {
+            Optional<Point> center = getElementCenterPoint(rect, centers);
+            center.ifPresent(point -> elements.add(new PlayElement(rect, mat, ElementType.NOTE, NodeDuration.EIGHT, center.get())));
         });
-        rectangles.removeAll(octetsMat.keySet());
+        rectangles.removeAll(eightsMat.keySet());
 
 
         // recognise all bar line
@@ -198,6 +202,7 @@ public class OmrOpenCV {
                 DatasetPaths.BARS_DATASET.getPath(),
                 refinedVerticalObjectsMat,
                 rectangles);
+        barsMat.forEach(((rect, mat) -> elements.add(new Element(rect, mat, ElementType.BAR))));
         rectangles.removeAll(barsMat.keySet());
 
         // recognise all dots
@@ -205,21 +210,44 @@ public class OmrOpenCV {
                 DatasetPaths.DOTS_DATASET.getPath(),
                 refinedVerticalObjectsMat,
                 rectangles);
+        dotsMat.forEach(((rect, mat) -> elements.add(new Element(rect, mat, ElementType.DOT))));
         rectangles.removeAll(dotsMat.keySet());
 
         // recognise all cleffs
         Map<Rect, Mat> cleffMat = matchingTemplate.detectAllElementsUsingDataset(
-                DatasetPaths.CLEFF_DATASET.getPath(),
+                DatasetPaths.CLEF_DATASET.getPath(),
                 refinedVerticalObjectsMat,
                 rectangles);
+        cleffMat.forEach(((rect, mat) -> elements.add(new Element(rect, mat, ElementType.CLEF))));
         rectangles.removeAll(cleffMat.keySet());
 
         // recognise all diezes(?)
-        Map<Rect, Mat> diezMat = matchingTemplate.detectAllElementsUsingDataset(
+        Map<Rect, Mat> sharpsMat = matchingTemplate.detectAllElementsUsingDataset(
                 DatasetPaths.DIEZ_DATASET.getPath(),
                 refinedVerticalObjectsMat,
                 rectangles);
-        rectangles.removeAll(diezMat.keySet());
+        sharpsMat.forEach(((rect, mat) -> elements.add(new Element(rect, mat, ElementType.SHARP))));
+        rectangles.removeAll(sharpsMat.keySet());
+
+        Map<Rect, Mat> quartersPause = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.QUARTER_PAUSE.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        quartersPause.forEach(((rect, mat) -> elements.add(new PlayElement(rect, mat, ElementType.PAUSE, NodeDuration.QUARTER, null))));
+        rectangles.removeAll(quartersPause.keySet());
+
+        Map<Rect, Mat> eightsPause = matchingTemplate.detectAllElementsUsingDataset(
+                DatasetPaths.EIGHT_PAUSE.getPath(),
+                refinedVerticalObjectsMat,
+                rectangles);
+        eightsPause.forEach(((rect, mat) -> elements.add(new PlayElement(rect, mat, ElementType.PAUSE, NodeDuration.EIGHT, null))));
+        rectangles.removeAll(eightsPause.keySet());
+
+        if (rectangles.size() > 0) {
+            System.err.println("There are still elements unrecognised from the input stave!");
+        }
+
+        return elements;
     }
 
     /**
