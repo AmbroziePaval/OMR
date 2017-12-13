@@ -89,8 +89,6 @@ public class StaveImageProcessing {
     public Mat getRefinedObjectsMat(Mat verticalObjectsMat) {
         Mat verticalMat = verticalObjectsMat.clone();
 
-        // 0. change back to the original bitwise values
-        Core.bitwise_not(verticalMat, verticalMat);
 
         // 1. extract edges
         Mat edgesMat = new Mat();
@@ -108,7 +106,11 @@ public class StaveImageProcessing {
         Imgproc.blur(smoothEdgesMat, smoothEdgesMat, new Size(2, 2));
         saveImage(smoothEdgesMat, SMOOTH_VERTICAL_OBJ_IMAGE_PATH.getPath());
 
-        smoothEdgesMat.copyTo(verticalMat, edgesMat);
+        smoothEdgesMat.copyTo(verticalMat, smoothEdgesMat);
+
+        // 0. change back to the original bitwise values
+        Core.bitwise_not(verticalMat, verticalMat);
+
         return verticalMat;
     }
 
