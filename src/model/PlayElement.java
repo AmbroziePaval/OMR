@@ -16,6 +16,8 @@ public class PlayElement extends Element {
     private NodeDuration duration;
     private Point center;
 
+    private Note note;
+
     public PlayElement(Rect rectangle, Mat mat, ElementType type, NodeDuration duration, Point center) {
         super(rectangle, mat, type);
         this.duration = duration;
@@ -30,10 +32,14 @@ public class PlayElement extends Element {
         return center;
     }
 
+    public void setNote(Note note) {
+        this.note = note;
+    }
+
     @Override
     public String toString() {
         if (ElementType.NOTE.equals(type)) {
-            return super.toString() + "\t" + duration.name().toLowerCase() + "\t" + " TODO(note type) ";
+            return super.toString() + "\t" + duration.name().toLowerCase() + "\t" + note.name();
         }
         return super.toString() + "\t" + duration.name().toLowerCase();
     }

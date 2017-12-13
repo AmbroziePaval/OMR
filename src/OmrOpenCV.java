@@ -18,6 +18,7 @@ import org.opencv.imgproc.Imgproc;
 import utils.DatasetPaths;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,13 +98,17 @@ public class OmrOpenCV {
         staveImageProcessing.saveImage(elementsWithRectanglesMat, DEFAULT_OUTPUT.getPath());
     }
 
-    public void detectStaveLines() {
+    public List<Rect> detectSortedStaveLines() {
         List<Rect> rectangles = StaveElementDetection.getImageElementContourRectangles(refinedHorizontalObjectsMat);
         System.out.println("Stave lines rectangles");
-        rectangles.forEach(rect -> System.out.println("rectangle " + rectangles.indexOf(rect) + " - x:" + rect.x + " y:" + rect.y));
+//        rectangles.forEach(rect -> System.out.println("rectangle " + rectangles.indexOf(rect) + " - x:" + rect.x + " y:" + rect.y));
+//        List<Rect> sortedRectangles = StaveElementDetection.sortElementsRectangles(rectangles);
+        rectangles.sort(Comparator.comparingInt(rect -> rect.y));
 
         Mat linesWithRectanglesMat = StaveElementDetection.findNotationContours(refinedHorizontalObjectsMat, rectangles, colorRed);
         staveImageProcessing.saveImage(linesWithRectanglesMat, DEFAULT_OUTPUT.getPath());
+
+        return rectangles;
     }
 
     public void detectAllElements() {

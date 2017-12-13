@@ -1,4 +1,7 @@
 import model.Element;
+import model.ElementType;
+import model.PlayElement;
+import opencv.StaveElementDetection;
 import org.opencv.core.Core;
 import org.opencv.core.Rect;
 import utils.OutputPaths;
@@ -26,17 +29,24 @@ public class Main {
 
         OmrOpenCV omrOpenCV = new OmrOpenCV(args[0]);
 //        omrOpenCV.detectMusicElement();
-//        omrOpenCV.detectStaveLines();
 //        omrOpenCV.detectAllElements();
 //        omrOpenCV.saveAllElements();
 //        omrOpenCV.detectQuarters();
 //        omrOpenCV.recongniseElementWithDatasets();
 //        List<Point> allCenterNotePoints = omrOpenCV.findAllCenterNotePoints();
+        List<Rect> sortedStaveLines = omrOpenCV.detectSortedStaveLines();
+
         List<Element> elements = omrOpenCV.recongiseElementsWithCenter();
         elements.sort(getElementComparator());
 
         PrintWriter resultFile = new PrintWriter(new FileWriter(OutputPaths.SORTED_RECOGNISED_ELEMENTS.getPath()));
-        elements.forEach(element -> resultFile.println(elements.indexOf(element) + "-\t" + element.toString()));
+        elements.forEach(element -> {
+            if (ElementType.NOTE.equals(element.getType())) {
+                ((PlayElement) element).setNote(
+                        StaveElementDetection.getNoteStringFromPointAndStaves(sortedStaveLines, ((PlayElement) element).getCenter()));
+            }
+            resultFile.println(elements.indexOf(element) + "-\t" + element.toString());
+        });
         resultFile.close();
     }
 

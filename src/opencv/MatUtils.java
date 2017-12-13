@@ -12,7 +12,6 @@ import org.opencv.core.Rect;
  */
 public class MatUtils {
 
-
     /**
      * Functions that crops the rectangle from the input image and returns the matrix of data corresponding to it
      *

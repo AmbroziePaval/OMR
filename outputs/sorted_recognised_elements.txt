@@ -2,26 +2,26 @@
 1-	SHARP
 2-	SHARP
 3-	SHARP
-4-	NOTE	quarter	 TODO(note type) 
-5-	NOTE	quarter	 TODO(note type) 
+4-	NOTE	quarter	A
+5-	NOTE	quarter	B
 6-	DOT
 7-	PAUSE	quarter
-8-	NOTE	eight	 TODO(note type) 
+8-	NOTE	eight	C
 9-	BAR
-10-	NOTE	quarter	 TODO(note type) 
-11-	NOTE	quarter	 TODO(note type) 
-12-	NOTE	quarter	 TODO(note type) 
+10-	NOTE	quarter	A
+11-	NOTE	quarter	C
+12-	NOTE	quarter	A
 13-	DOT
-14-	NOTE	eight	 TODO(note type) 
+14-	NOTE	eight	C
 15-	BAR
-16-	NOTE	quarter	 TODO(note type) 
-17-	NOTE	quarter	 TODO(note type) 
-18-	NOTE	quarter	 TODO(note type) 
-19-	NOTE	quarter	 TODO(note type) 
+16-	NOTE	quarter	B
+17-	NOTE	quarter	A
+18-	NOTE	quarter	F
+19-	NOTE	quarter	C
 20-	BAR
-21-	NOTE	quarter	 TODO(note type) 
-22-	NOTE	quarter	 TODO(note type) 
-23-	NOTE	quarter	 TODO(note type) 
+21-	NOTE	quarter	B
+22-	NOTE	quarter	A
+23-	NOTE	quarter	G
 24-	DOT
 25-	PAUSE	eight
 26-	BAR

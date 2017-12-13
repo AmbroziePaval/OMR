@@ -1,5 +1,6 @@
 package opencv;
 
+import model.Note;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -132,5 +133,33 @@ public class StaveElementDetection {
         else if (rect1.contains(new Point(rect2.x + rect2.width, rect2.y)))
             return true;
         else return rect1.contains(new Point(rect2.x + rect2.width, rect2.y + rect2.height));
+    }
+
+    public static Note getNoteStringFromPointAndStaves(List<Rect> sortedStaveLines, Point notePoint) {
+        int noteY = (int) notePoint.y;
+        if (sortedStaveLines.size() != 5) {
+            System.err.println("Not correct detection of stave lines!");
+        }
+
+        if (noteY < sortedStaveLines.get(0).y || noteY > sortedStaveLines.get(4).y) {
+            return Note.YET_UNKNOWN;
+        } else if (noteY >= sortedStaveLines.get(2).y + sortedStaveLines.get(2).height && noteY <= sortedStaveLines.get(3).y) {
+            return Note.A;
+        } else if (noteY >= sortedStaveLines.get(2).y && noteY <= sortedStaveLines.get(2).y + sortedStaveLines.get(2).height) {
+            return Note.B;
+        } else if (noteY >= sortedStaveLines.get(1).y + sortedStaveLines.get(1).height && noteY <= sortedStaveLines.get(2).y) {
+            return Note.C;
+        } else if (noteY >= sortedStaveLines.get(1).y && noteY <= sortedStaveLines.get(1).y + sortedStaveLines.get(1).height) {
+            return Note.D;
+        } else if ((noteY >= sortedStaveLines.get(0).y + sortedStaveLines.get(0).height && noteY <= sortedStaveLines.get(1).y)
+                || (noteY >= sortedStaveLines.get(4).y && noteY <= sortedStaveLines.get(4).y + sortedStaveLines.get(4).height)) {
+            return Note.E;
+        } else if ((noteY >= sortedStaveLines.get(0).y && noteY <= sortedStaveLines.get(0).y + sortedStaveLines.get(0).height)
+                || (noteY >= sortedStaveLines.get(3).y + sortedStaveLines.get(3).height && noteY <= sortedStaveLines.get(4).y)) {
+            return Note.F;
+        } else if ((noteY >= sortedStaveLines.get(3).y && noteY <= sortedStaveLines.get(3).y + sortedStaveLines.get(3).height)) {
+            return Note.G;
+        }
+        return Note.YET_UNKNOWN;
     }
 }
